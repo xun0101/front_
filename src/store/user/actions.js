@@ -59,25 +59,47 @@ export const getInfo = async ({ commit, state }) => {
   }
 }
 
+// export const signInLine = async ({ commit, state }) => {
+//   const matches = location.href.match(/jwt=([^.\s]+.[^.\s]+.[^.\s]+)/gm)
+//   if (matches?.length > 0) {
+//     const jwt = matches[0].substring(4, 176)
+//     if (jwt) {
+//       await api.get('/users/signInLineData', {
+//         headers: {
+//           authorization: 'Bearer ' + jwt
+//         }
+//       }).then(res => {
+//         commit('login', res.data)
+//         window.history.pushState('', '', location.pathname)
+//       }).catch((error) => {
+//         console.log(error)
+//         commit('logout')
+//       })
+//     }
+//   }
+// }
+
 export const signInLine = async ({ commit, state }) => {
-  const matches = location.href.match(/jwt=([^.\s]+.[^.\s]+.[^.\s]+)/gm)
-  if (matches?.length > 0) {
-    const jwt = matches[0].substring(4, 176)
-    if (jwt) {
-      await api.get('/users/signInLineData', {
+  const urlParams = new URLSearchParams(window.location.search)
+  const jwt = urlParams.get('jwt')
+
+  if (jwt) {
+    try {
+      const res = await api.get('/users/signInLineData', {
         headers: {
           authorization: 'Bearer ' + jwt
         }
-      }).then(res => {
-        commit('login', res.data)
-        window.history.pushState('', '', location.pathname)
-      }).catch((error) => {
-        console.log(error)
-        commit('logout')
       })
+      commit('login', res.data)
+      // 清掉 URL 上的 jwt
+      window.history.replaceState({}, '', location.pathname)
+    } catch (error) {
+      console.log(error)
+      commit('logout')
     }
   }
 }
+
 
 export const addcart = async ({ commit, state }, data) => {
   if (state.token.length === 0) {
